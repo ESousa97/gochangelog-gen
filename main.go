@@ -11,14 +11,17 @@ import (
 
 // CommitData represents a parsed Conventional Commit
 type CommitData struct {
-	Type    string
-	Scope   string
-	Message string
+	Type                string
+	Scope               string
+	Message             string
+	IsBreaking          bool
+	BreakingDescription string
 }
 
 // Conventional Commit Regex
 // Pattern: type(scope)!: description
 var commitRegex = regexp.MustCompile(`^(\w+)(?:\(([^)]+)\))?(!?): (.+)$`)
+var breakingFooterRegex = regexp.MustCompile(`(?m)^BREAKING[- ]CHANGE: (.*)`)
 
 func parseCommit(message string) (*CommitData, bool) {
 	// Conventional commits usually have a short summary line
@@ -33,11 +36,21 @@ func parseCommit(message string) (*CommitData, bool) {
 		return nil, false
 	}
 
-	return &CommitData{
-		Type:    matches[1],
-		Scope:   matches[2],
-		Message: matches[4],
-	}, true
+	data := &CommitData{
+		Type:       matches[1],
+		Scope:      matches[2],
+		IsBreaking: matches[3] == "!",
+		Message:    matches[4],
+	}
+
+	// Check for BREAKING CHANGE: in the body
+	bodyMatches := breakingFooterRegex.FindStringSubmatch(message)
+	if bodyMatches != nil {
+		data.IsBreaking = true
+		data.BreakingDescription = strings.TrimSpace(bodyMatches[1])
+	}
+
+	return data, true
 }
 
 func main() {
@@ -71,11 +84,15 @@ func main() {
 	}
 
 	groupedCommits := make(map[string][]CommitData)
+	var breakingChanges []CommitData
 
 	// Iterate over commits
 	err = cIter.ForEach(func(c *object.Commit) error {
 		data, ok := parseCommit(c.Message)
 		if ok {
+			if data.IsBreaking {
+				breakingChanges = append(breakingChanges, *data)
+			}
 			cat, mapped := categoryMap[data.Type]
 			if !mapped {
 				cat = "Others"
@@ -104,6 +121,23 @@ func main() {
 	// Output the results
 	fmt.Println("Changelog:")
 	fmt.Println("==========")
+
+	// Breaking Changes Section
+	if len(breakingChanges) > 0 {
+		fmt.Println("\n⚠️  BREAKING CHANGES")
+		fmt.Println("-------------------")
+		for _, bc := range breakingChanges {
+			scope := ""
+			if bc.Scope != "" {
+				scope = fmt.Sprintf("**%s**: ", bc.Scope)
+			}
+			fmt.Printf("- %s%s\n", scope, bc.Message)
+			if bc.BreakingDescription != "" {
+				fmt.Printf("  *Note: %s*\n", bc.BreakingDescription)
+			}
+		}
+	}
+
 	for _, cat := range categories {
 		commits, exists := groupedCommits[cat]
 		if !exists || len(commits) == 0 {

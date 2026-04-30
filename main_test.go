@@ -7,10 +7,10 @@ import (
 
 func TestParseCommit(t *testing.T) {
 	tests := []struct {
-		name     string
-		message  string
-		want     *CommitData
-		wantOk   bool
+		name    string
+		message string
+		want    *CommitData
+		wantOk  bool
 	}{
 		{
 			name:    "simple feat",
@@ -28,6 +28,53 @@ func TestParseCommit(t *testing.T) {
 				Type:    "feat",
 				Scope:   "cli",
 				Message: "add grouping",
+			},
+			wantOk: true,
+		},
+		{
+			name:    "breaking feat with !",
+			message: "feat!: breaking change",
+			want: &CommitData{
+				Type:       "feat",
+				IsBreaking: true,
+				Message:    "breaking change",
+			},
+			wantOk: true,
+		},
+		{
+			name:    "breaking feat with scope and !",
+			message: "feat(api)!: breaking change",
+			want: &CommitData{
+				Type:       "feat",
+				Scope:      "api",
+				IsBreaking: true,
+				Message:    "breaking change",
+			},
+			wantOk: true,
+		},
+		{
+			name: "breaking change in body",
+			message: `feat: change api
+
+BREAKING CHANGE: the old api is gone`,
+			want: &CommitData{
+				Type:                "feat",
+				IsBreaking:          true,
+				Message:             "change api",
+				BreakingDescription: "the old api is gone",
+			},
+			wantOk: true,
+		},
+		{
+			name: "breaking change with dash in body",
+			message: `fix: fix security
+
+BREAKING-CHANGE: security update required`,
+			want: &CommitData{
+				Type:                "fix",
+				IsBreaking:          true,
+				Message:             "fix security",
+				BreakingDescription: "security update required",
 			},
 			wantOk: true,
 		},
@@ -56,7 +103,7 @@ func TestParseCommit(t *testing.T) {
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("parseCommit() = %v, want %v", got, tt.want)
+				t.Errorf("parseCommit() = %+v, want %+v", got, tt.want)
 			}
 		})
 	}
