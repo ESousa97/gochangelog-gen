@@ -22,12 +22,15 @@ import (
 type ChangelogData struct {
 	Version         string
 	Date            string
+	ImpactScore     int
 	BreakingChanges []CommitData
 	Categories      []string
 	GroupedCommits  map[string][]CommitData
 }
 
 const defaultTemplate = `# {{.Version}} ({{.Date}})
+**Release Impact Score:** {{.ImpactScore}}
+
 {{if .BreakingChanges}}
 ## ⚠️ BREAKING CHANGES
 {{range .BreakingChanges}}- {{if .Scope}}**{{.Scope}}**: {{end}}{{.Message}}{{if .BreakingDescription}}
@@ -287,10 +290,13 @@ func main() {
 		nextVersion = fmt.Sprintf("v%d.%d.%d", major, minor, patch)
 	}
 
+	impactScore := (len(breakingChanges) * 50) + (len(groupedCommits["Features"]) * 10) + ((len(groupedCommits["Bug Fixes"]) + len(groupedCommits["Refactor"])) * 1)
+
 	// Prepare data for template
 	data := ChangelogData{
 		Version:         nextVersion,
 		Date:            time.Now().Format("2006-01-02"),
+		ImpactScore:     impactScore,
 		BreakingChanges: breakingChanges,
 		Categories:      categories,
 		GroupedCommits:  groupedCommits,
