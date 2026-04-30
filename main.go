@@ -1,13 +1,42 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
+	"text/template"
+	"time"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
+
+// ChangelogData holds the context for rendering the changelog template
+type ChangelogData struct {
+	Version         string
+	Date            string
+	BreakingChanges []CommitData
+	Categories      []string
+	GroupedCommits  map[string][]CommitData
+}
+
+const defaultTemplate = `# {{.Version}} ({{.Date}})
+{{if .BreakingChanges}}
+## ⚠️ BREAKING CHANGES
+{{range .BreakingChanges}}- {{if .Scope}}**{{.Scope}}**: {{end}}{{.Message}}{{if .BreakingDescription}}
+  *Note: {{.BreakingDescription}}*{{end}}
+{{end}}{{end}}
+{{- range $cat := .Categories}}
+{{- $commits := index $.GroupedCommits $cat}}
+{{- if $commits}}
+## {{$cat}}
+{{range $commits}}- {{if .Scope}}**{{.Scope}}**: {{end}}{{.Message}}
+{{end}}
+{{- end}}
+{{- end}}
+`
 
 // CommitData represents a parsed Conventional Commit
 type CommitData struct {
@@ -54,6 +83,10 @@ func parseCommit(message string) (*CommitData, bool) {
 }
 
 func main() {
+	versionFlag := flag.String("version", "vUnreleased", "Version to be displayed in the changelog title")
+	templateFlag := flag.String("template", "", "Path to a custom Markdown template file (.tmpl)")
+	flag.Parse()
+
 	// Open the repository in the current directory
 	repo, err := git.PlainOpen(".")
 	if err != nil {
@@ -118,39 +151,45 @@ func main() {
 		return
 	}
 
-	// Output the results
-	fmt.Println("Changelog:")
-	fmt.Println("==========")
+	// Prepare data for template
+	data := ChangelogData{
+		Version:         *versionFlag,
+		Date:            time.Now().Format("2006-01-02"),
+		BreakingChanges: breakingChanges,
+		Categories:      categories,
+		GroupedCommits:  groupedCommits,
+	}
 
-	// Breaking Changes Section
-	if len(breakingChanges) > 0 {
-		fmt.Println("\n⚠️  BREAKING CHANGES")
-		fmt.Println("-------------------")
-		for _, bc := range breakingChanges {
-			scope := ""
-			if bc.Scope != "" {
-				scope = fmt.Sprintf("**%s**: ", bc.Scope)
-			}
-			fmt.Printf("- %s%s\n", scope, bc.Message)
-			if bc.BreakingDescription != "" {
-				fmt.Printf("  *Note: %s*\n", bc.BreakingDescription)
-			}
+	// Parse template
+	var tmpl *template.Template
+	if *templateFlag != "" {
+		tmpl, err = template.ParseFiles(*templateFlag)
+		if err != nil {
+			fmt.Printf("Error parsing external template: %s\n", err)
+			return
+		}
+	} else {
+		tmpl, err = template.New("changelog").Parse(defaultTemplate)
+		if err != nil {
+			fmt.Printf("Error parsing default template: %s\n", err)
+			return
 		}
 	}
 
-	for _, cat := range categories {
-		commits, exists := groupedCommits[cat]
-		if !exists || len(commits) == 0 {
-			continue
-		}
-
-		fmt.Printf("\n## %s\n", cat)
-		for _, pc := range commits {
-			scope := ""
-			if pc.Scope != "" {
-				scope = fmt.Sprintf("**%s**: ", pc.Scope)
-			}
-			fmt.Printf("- %s%s\n", scope, pc.Message)
-		}
+	// Open output file
+	outFile, err := os.Create("CHANGELOG_PENDING.md")
+	if err != nil {
+		fmt.Printf("Error creating CHANGELOG_PENDING.md: %s\n", err)
+		return
 	}
+	defer outFile.Close()
+
+	// Execute template
+	err = tmpl.Execute(outFile, data)
+	if err != nil {
+		fmt.Printf("Error executing template: %s\n", err)
+		return
+	}
+
+	fmt.Println("Successfully generated CHANGELOG_PENDING.md")
 }

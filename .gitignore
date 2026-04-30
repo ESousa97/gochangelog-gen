@@ -2,3 +2,4 @@ gochangelog-gen.exe
 gochangelog-gen
 vendor/
 *.log
+CHANGELOG_PENDING.md
