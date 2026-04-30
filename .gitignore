@@ -1,0 +1,4 @@
+gochangelog-gen.exe
+gochangelog-gen
+vendor/
+*.log

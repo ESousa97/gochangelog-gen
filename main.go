@@ -61,12 +61,37 @@ func main() {
 		return
 	}
 
-	var parsedCommits []CommitData
+	// Categories and their mapping
+	categories := []string{"Features", "Bug Fixes", "Documentation", "Refactor", "Others"}
+	categoryMap := map[string]string{
+		"feat":     "Features",
+		"fix":      "Bug Fixes",
+		"docs":     "Documentation",
+		"refactor": "Refactor",
+	}
+
+	groupedCommits := make(map[string][]CommitData)
 
 	// Iterate over commits
 	err = cIter.ForEach(func(c *object.Commit) error {
-		if data, ok := parseCommit(c.Message); ok {
-			parsedCommits = append(parsedCommits, *data)
+		data, ok := parseCommit(c.Message)
+		if ok {
+			cat, mapped := categoryMap[data.Type]
+			if !mapped {
+				cat = "Others"
+			}
+			groupedCommits[cat] = append(groupedCommits[cat], *data)
+		} else {
+			// Non-conventional commit or empty message
+			lines := strings.Split(c.Message, "\n")
+			if len(lines) > 0 {
+				msg := strings.TrimSpace(lines[0])
+				if msg != "" {
+					groupedCommits["Others"] = append(groupedCommits["Others"], CommitData{
+						Message: msg,
+					})
+				}
+			}
 		}
 		return nil
 	})
@@ -77,12 +102,21 @@ func main() {
 	}
 
 	// Output the results
-	fmt.Println("Parsed Conventional Commits:")
-	for _, pc := range parsedCommits {
-		scope := ""
-		if pc.Scope != "" {
-			scope = fmt.Sprintf("(%s)", pc.Scope)
+	fmt.Println("Changelog:")
+	fmt.Println("==========")
+	for _, cat := range categories {
+		commits, exists := groupedCommits[cat]
+		if !exists || len(commits) == 0 {
+			continue
 		}
-		fmt.Printf("- %s%s: %s\n", pc.Type, scope, pc.Message)
+
+		fmt.Printf("\n## %s\n", cat)
+		for _, pc := range commits {
+			scope := ""
+			if pc.Scope != "" {
+				scope = fmt.Sprintf("**%s**: ", pc.Scope)
+			}
+			fmt.Printf("- %s%s\n", scope, pc.Message)
+		}
 	}
 }
