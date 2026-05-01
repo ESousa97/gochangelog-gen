@@ -7,7 +7,7 @@
   <br>
 
 ![CI](https://github.com/esousa97/gochangelog-gen/actions/workflows/ci.yml/badge.svg)
-[![Go Report Card](https://goreportcard.com/badge/github.com/esousa97/gochangelog-gen?style=flat)](https://goreportcard.com/report/github.com/esousa97/gochangelog-gen)
+[![Go Report Card](https://goreportcard.com/badge/github.com/esousa97/gochangelog-gen?style=flat?=v2)](https://goreportcard.com/report/github.com/esousa97/gochangelog-gen)
 [![CodeFactor](https://www.codefactor.io/repository/github/esousa97/gochangelog-gen/badge)](https://www.codefactor.io/repository/github/esousa97/gochangelog-gen)
 [![Go Reference](https://img.shields.io/badge/go.dev-reference-007d9c?style=flat&logo=go&logoColor=white)](https://pkg.go.dev/github.com/esousa97/gochangelog-gen)
 ![License](https://img.shields.io/github/license/esousa97/gochangelog-gen?style=flat&color=blue)
