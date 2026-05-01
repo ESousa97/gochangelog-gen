@@ -8,7 +8,7 @@ Write-Host "--- Starting Automated Integration Test ---" -ForegroundColor Cyan
 
 # 1. Build the application
 Write-Host "[1/4] Building application..." -ForegroundColor Yellow
-go build -o $executable main.go
+go build -o $executable ./cmd/gochangelog-gen/main.go
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Build failed!" -ForegroundColor Red
     exit $LASTEXITCODE
@@ -26,17 +26,22 @@ if ($LASTEXITCODE -ne 0) {
 # 3. Run the tool
 Write-Host "[3/4] Running gochangelog-gen in the cloned repo..." -ForegroundColor Yellow
 Push-Location $tempDir
-$output = & "..\$executable"
+& "..\$executable"
+if (Test-Path "CHANGELOG_PENDING.md") {
+    $output = Get-Content "CHANGELOG_PENDING.md" -Raw
+} else {
+    $output = ""
+}
 Pop-Location
 
 # 4. Validate output
 Write-Host "[4/4] Validating output..." -ForegroundColor Yellow
 
-$hasChangelogHeader = $output -match "Changelog:"
+$hasVersionHeader = $output -match "# v"
 $hasSections = $output -match "## "
 $hasOthers = $output -match "## Others"
 
-if ($hasChangelogHeader -and $hasSections -and $hasOthers) {
+if ($hasVersionHeader -and $hasSections -and $hasOthers) {
     Write-Host "SUCCESS: Output format is valid!" -ForegroundColor Green
     Write-Host "`nSample of the generated output:" -ForegroundColor Gray
     $output[0..15] | ForEach-Object { Write-Host $_ }

@@ -1,5 +1,55 @@
-gochangelog-gen.exe
-gochangelog-gen
-vendor/
-*.log
+# Go binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Build output
+/bin/
+/dist/
+/build/
+
+# Test output
+*.test
+*.out
+coverage.txt
+coverage.html
+coverage.prof
+
+# Vendor (optional)
+# vendor/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Internal documents
+BASELINE.md
+FINAL.md
+
+# Debug artifacts
+__debug_bin*
+debug.test
+
+# Temporary files
+tmp/
+*.tmp
+
+# Generated changelog (output of the tool)
 CHANGELOG_PENDING.md
+
+# Integration test artifacts
+test_integration_repo/

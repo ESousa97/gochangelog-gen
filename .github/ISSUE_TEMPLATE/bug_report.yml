@@ -1,0 +1,39 @@
+name: Bug Report
+description: Crie um relato de bug para nos ajudar a melhorar
+title: "[BUG] "
+labels: ["bug"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por reportar o bug! Preencha as informações abaixo.
+  - type: input
+    id: version
+    attributes:
+      label: Versão do gochangelog-gen
+      description: Qual versão você está utilizando? (ex: v1.2.3)
+      placeholder: v1.0.0
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Descrição do Bug
+      description: Descreva de forma clara e concisa o bug.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Passos para Reproduzir
+      description: Como podemos reproduzir o erro?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportamento Esperado
+      description: O que você esperava que acontecesse?
+    validations:
+      required: true

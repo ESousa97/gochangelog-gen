@@ -1,0 +1,24 @@
+name: Feature Request
+description: Sugira uma nova funcionalidade ou melhoria
+title: "[FEAT] "
+labels: ["enhancement"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado pelo interesse em melhorar o gochangelog-gen!
+  - type: textarea
+    id: problem
+    attributes:
+      label: Qual problema essa feature resolve?
+      description: A funcionalidade está relacionada a um problema atual?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solução Proposta
+      description: Descreva como você imagina que a feature deveria funcionar.
+    validations:
+      required: true

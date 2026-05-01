@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Fórum de Discussão (GitHub Discussions)
+    url: https://github.com/esousa97/gochangelog-gen/discussions
+    about: Faça perguntas e interaja com a comunidade.
