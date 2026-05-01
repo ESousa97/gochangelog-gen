@@ -1,6 +1,6 @@
 module github.com/esousa97/gochangelog-gen
 
-go 1.24.0
+go 1.26.2
 
 require github.com/go-git/go-git/v5 v5.18.0
 
