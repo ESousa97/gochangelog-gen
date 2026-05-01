@@ -4,11 +4,15 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    allow:
+      - dependency-type: "all"
     groups:
       go-dependencies:
         update-types:
           - "minor"
           - "patch"
+    open-pull-requests-limit: 10
+    rebase-strategy: "auto"
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -19,3 +23,5 @@ updates:
         update-types:
           - "minor"
           - "patch"
+    open-pull-requests-limit: 10
+    rebase-strategy: "auto"
