@@ -66,7 +66,7 @@ $ gochangelog-gen generate --suggest-version
 
 | Technology | Purpose |
 |---|---|
-| **Go 1.25** | Core language for a single, fast, static binary. |
+| **Go 1.24** | Core language for a single, fast, static binary. |
 | **go-git** | Pure Go implementation of Git for repository interaction. |
 | **Cobra** | Robust CLI framework for commands and flag management. |
 | **GitHub API** | Integration for automated release drafting. |
@@ -74,7 +74,7 @@ $ gochangelog-gen generate --suggest-version
 
 ## Prerequisites
 
-- **Go** >= 1.25.0 (for building from source)
+- **Go** >= 1.24.0 (for building from source)
 - **Git** repository with at least one tag (for history delta calculation)
 - *(Optional)* **GITHUB_TOKEN** for creating release drafts
 
