@@ -16,10 +16,11 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.26'
+          cache: true
+      - name: Verify dependencies
+        run: go mod tidy && git diff --exit-code go.mod go.sum
       - name: golangci-lint
         uses: golangci-lint/golangci-lint-action@v6
-        with:
-          version: v1.61
 
   test:
     name: Test
