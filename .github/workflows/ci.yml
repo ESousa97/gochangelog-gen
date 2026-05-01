@@ -34,7 +34,9 @@ jobs:
         run: go mod tidy
 
       - name: Lint
-        run: make lint
+        uses: golangci/golangci-lint-action@971e284b6050e8a5849b72094c50ab08da042db8 # v6.1.1
+        with:
+          version: latest
 
       - name: Test
         run: make test
